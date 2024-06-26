@@ -11,7 +11,15 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QSystemTrayIcon,
 )
+import soundfile as sf
+import sounddevice as sd
 
+def play_wav(file_path):
+    # 使用 soundfile 读取音频文件
+    data, samplerate = sf.read(file_path)
+    # 使用 sounddevice 播放音频
+    sd.play(data, samplerate)
+    # sd.wait()  # 等待播放完毕
 
 background_window = None
 overlay_window = None
@@ -56,6 +64,8 @@ class MainScheduler:
         self.end_timepoints = args.get("end_timepoints", [])
         self.texts = args.get("texts", [])
         self.img_dir = args.get("img_dir", "")
+        self.audio_dir_when_start = args.get("audio_dir_when_start", "")
+        self.audio_dir_when_end = args.get("audio_dir_when_end", "")
 
         self.ChildClock = None
         self.ChildBackground = None
@@ -97,6 +107,13 @@ class MainScheduler:
                 self.period_end(index)
 
     def period_start(self, index):
+        # play the audio file saying it's starting
+        if os.path.exists(self.audio_dir_when_start):
+            start_audios = os.listdir(self.audio_dir_when_start)
+            start_audio = random.choice(start_audios)
+            print(f'Playing audio: {start_audio}')
+            play_wav(os.path.join(self.audio_dir_when_start, start_audio))
+        
         # start a clock, close the background
         if self.ChildBackground:
             self.ChildBackground.close()
@@ -111,6 +128,13 @@ class MainScheduler:
         print(f"Start a new time period.")
 
     def period_end(self, index):
+        # play the audio file saying it's ending
+        if os.path.exists(self.audio_dir_when_end):
+            end_audios = os.listdir(self.audio_dir_when_end)
+            end_audio = random.choice(end_audios)
+            print(f'Playing audio: {end_audio}')
+            play_wav(os.path.join(self.audio_dir_when_end, end_audio))
+        
         # close the clock, start the background
         if self.ChildClock:
             self.ChildClock.close()

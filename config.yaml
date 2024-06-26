@@ -14,3 +14,5 @@ schedule:
       - 20:10-21:10 : 自由编程
       # - 23:33-23:40 : hehe
     img_dir: E:\twitter_media\Dormicumproject
+    audio_dir_when_start: D:\coding\gptsovits_infer_api\output\现在该继续学习了哟
+    audio_dir_when_end: D:\coding\gptsovits_infer_api\output\现在是休息时间哦

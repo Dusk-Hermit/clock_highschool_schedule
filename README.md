@@ -3,7 +3,7 @@
 change your config.yaml
 
 ```py
-pip install pyqt6
+pip install pyqt6 soundfile sounddevice
 ```
 
 and then
@@ -14,5 +14,4 @@ python main.py
 
 - css
   - background widgets beautify
-- loop  when exit
-- sound when state changes
+- loop when exit
