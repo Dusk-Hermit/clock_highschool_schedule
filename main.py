@@ -30,12 +30,12 @@ def parse_time(schedule):
             to_return[1].append(QTime(h1,m1,0))
             to_return[2].append(v)
     
-    print(to_return)
+    # print(to_return)
     return to_return
 
 def check_time_valid(starts,ends):
-    print(starts)
-    print(ends)
+    # print(starts)
+    # print(ends)
     if len(starts)!=len(ends):
         return False
     for i in range(len(starts)):
@@ -82,7 +82,7 @@ def main():
     # print(yaml_data)
     # print(check_result)
     
-    scheduler=MainScheduler([starts,ends,texts])
+    scheduler=MainScheduler({'start_timepoints':starts,'end_timepoints':ends,'texts':texts,'img_dir':activated_schedule['img_dir']})
     sys.exit(app.exec())
 
 
