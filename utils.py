@@ -1,6 +1,6 @@
-import sys, os, shutil, random
+import sys, os, shutil, random, time
 from PyQt6.QtCore import Qt, QTimer, QTime, pyqtSignal, QObject, QDateTime, QEvent
-from PyQt6.QtGui import QPixmap, QGuiApplication, QMouseEvent,QIcon
+from PyQt6.QtGui import QPixmap, QGuiApplication, QMouseEvent, QIcon
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -14,12 +14,15 @@ from PyQt6.QtWidgets import (
 import soundfile as sf
 import sounddevice as sd
 
+TIME_DELAY = 0.1
+
 def play_wav(file_path):
     # 使用 soundfile 读取音频文件
     data, samplerate = sf.read(file_path)
     # 使用 sounddevice 播放音频
-    sd.play(data, samplerate)
+    sd.play(data, samplerate, blocking=False)
     # sd.wait()  # 等待播放完毕
+
 
 background_window = None
 overlay_window = None
@@ -111,9 +114,9 @@ class MainScheduler:
         if os.path.exists(self.audio_dir_when_start):
             start_audios = os.listdir(self.audio_dir_when_start)
             start_audio = random.choice(start_audios)
-            print(f'Playing audio: {start_audio}')
+            print(f"Playing audio: {start_audio}")
             play_wav(os.path.join(self.audio_dir_when_start, start_audio))
-        
+
         # start a clock, close the background
         if self.ChildBackground:
             self.ChildBackground.close()
@@ -132,9 +135,9 @@ class MainScheduler:
         if os.path.exists(self.audio_dir_when_end):
             end_audios = os.listdir(self.audio_dir_when_end)
             end_audio = random.choice(end_audios)
-            print(f'Playing audio: {end_audio}')
+            print(f"Playing audio: {end_audio}")
             play_wav(os.path.join(self.audio_dir_when_end, end_audio))
-        
+
         # close the clock, start the background
         if self.ChildClock:
             self.ChildClock.close()
@@ -143,7 +146,9 @@ class MainScheduler:
             {
                 "img_path": random.choice(self.parse_img_dir()),
                 "text": self.texts[index],
-                "to_time": self.start_timepoints[index], # Time when the relax period ends
+                "to_time": self.start_timepoints[
+                    index
+                ],  # Time when the relax period ends
             }
         )
         self.ChildBackground.show()
@@ -151,7 +156,7 @@ class MainScheduler:
 
 
 class DraggableClock(QWidget):
-    
+
     def __init__(self, args):
         self.WINDOW_WIDTH = 320
         self.WINDOW_HEIGHT = 240
@@ -177,14 +182,14 @@ class DraggableClock(QWidget):
 
         self.countdown_label = QLabel(self)
         self.countdown_label.setStyleSheet(
-            "font-size: 18px; color: white; background-color: black; padding: 5px; border-radius: 5px;"
+            "font-size: 24px; color: white; background-color: black; padding: 5px; border-radius: 5px;"
         )
         self.countdown_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.countdown_label)
 
         self.text_label = QLabel(self.text, self)
         self.text_label.setStyleSheet(
-            "font-size: 14px; color: white; background-color: black; padding: 5px; border-radius: 5px;"
+            "font-size: 20px; color: white; background-color: black; padding: 5px; border-radius: 5px;"
         )
         self.text_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.text_label)
@@ -203,12 +208,12 @@ class DraggableClock(QWidget):
         screen_geometry = screen.geometry()
         screen_width = screen_geometry.width()
         screen_height = screen_geometry.height()
-        print(f'Primary screen size: {screen_width}x{screen_height}')
+        print(f"Primary screen size: {screen_width}x{screen_height}")
 
         # 获取窗口的大小
         window_width = self.geometry().width()
         window_height = self.geometry().height()
-        print(f'Window size: {window_width}x{window_height}')
+        print(f"Window size: {window_width}x{window_height}")
 
         # 计算窗口的新位置
         x = screen_width - self.WINDOW_WIDTH
@@ -228,11 +233,14 @@ class DraggableClock(QWidget):
             hours = time_to_target // 3600
             minutes = (time_to_target % 3600) // 60
             seconds = time_to_target % 60
-            countdown_str = f"Countdown to {self.to_time.hour():02}:{self.to_time.minute():02}:{self.to_time.second():02}: {hours:02}:{minutes:02}:{seconds:02}"
+            countdown_str = f"Countdown: {hours:02}:{minutes:02}:{seconds:02}"
         else:
             countdown_str = "Target time passed"
 
         self.countdown_label.setText(countdown_str)
+        self.text_label.setText(
+            f"{self.text} Till {self.to_time.hour():02}:{self.to_time.minute():02}:{self.to_time.second():02}"
+        )
 
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -243,42 +251,6 @@ class DraggableClock(QWidget):
             self.move(event.globalPosition().toPoint() - self.offset)
 
 
-# class DraggableClock(QWidget):
-#     def __init__(self):
-#         super().__init__()
-#         self.initUI()
-
-#     def initUI(self):
-#         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
-#         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-
-#         self.layout = QVBoxLayout()
-#         self.clock_label = QLabel(self)
-#         self.clock_label.setStyleSheet("font-size: 24px; color: white; background-color: black; padding: 10px; border-radius: 10px;")
-#         self.clock_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-#         self.layout.addWidget(self.clock_label)
-#         self.setLayout(self.layout)
-
-#         self.timer = QTimer(self)
-#         self.timer.timeout.connect(self.update_clock)
-#         self.timer.start(1000)  # Update every second
-
-#         self.update_clock()
-
-#     def update_clock(self):
-#         current_time = QTime.currentTime().toString('hh:mm:ss')
-#         self.clock_label.setText(current_time)
-
-#     def mousePressEvent(self, event: QMouseEvent):
-#         if event.button() == Qt.MouseButton.LeftButton:
-#             self.offset = event.pos()
-
-#     def mouseMoveEvent(self, event: QMouseEvent):
-#         if event.buttons() == Qt.MouseButton.LeftButton:
-#             self.move(event.globalPosition().toPoint() - self.offset)
-
-
 class ChildWindow(QMainWindow):
     window_closed = pyqtSignal()
     window_minimized = pyqtSignal()
@@ -286,6 +258,7 @@ class ChildWindow(QMainWindow):
     def __init__(self, args={}):
         self.text = args.get("text", "")
         super().__init__()
+        self.is_destroyed = False
 
         self.setWindowTitle("Overlay Window")
         self.setWindowFlags(
@@ -307,12 +280,20 @@ class ChildWindow(QMainWindow):
 
     def child_minimize_and_emit(self):
         # self.showMinimized()
+        if self.is_destroyed:
+            return
+        self.is_destroyed = True
         self.close()
+        time.sleep(TIME_DELAY)
         self.window_minimized.emit()
 
     def child_close_and_emit(self):
         # 当前应用只有这一个窗口的时候，当唯一的窗口关掉了，那程序就关闭了
+        if self.is_destroyed:
+            return
+        self.is_destroyed = True
         self.close()
+        time.sleep(TIME_DELAY)
         self.window_closed.emit()
 
     def initUI(self):
@@ -393,7 +374,11 @@ class BackgroundWindow(QMainWindow):
         self.new_child()
 
     def new_child(self):
-        self.child_window = ChildWindow({"text": f'下一阶段：{self.text}\n Relax till {self.to_time.toString("hh:mm:ss")}'})
+        self.child_window = ChildWindow(
+            {
+                "text": f'下一阶段：{self.text}\n Relax till {self.to_time.toString("hh:mm:ss")}'
+            }
+        )
         self.child_window.window_closed.connect(self.should_close)
         self.child_window.window_minimized.connect(self.should_minimize)
         self.child_window.show()
@@ -406,6 +391,7 @@ class BackgroundWindow(QMainWindow):
 
     def changeEvent(self, event):
         if event.type() == QEvent.Type.WindowStateChange:
+            time.sleep(TIME_DELAY)
             state = self.windowState()
             if (
                 not state & Qt.WindowState.WindowMinimized
@@ -440,3 +426,9 @@ class BackgroundWindow(QMainWindow):
         layout.addWidget(background_label)
 
         self.setCentralWidget(central_widget)
+
+    def mousePressEvent(self, event: QMouseEvent):
+        time.sleep(TIME_DELAY)
+        if self.isActiveWindow():
+            self.child_window.raise_()
+            self.child_window.activateWindow()

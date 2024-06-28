@@ -1,4 +1,4 @@
-activate: Regular
+activate: Today
 schedule:
   - 
     name: Regular
@@ -12,7 +12,18 @@ schedule:
       - 17:00-18:00 : 计组408
       - 19:00-20:00 : 考研任选范围
       - 20:10-21:10 : 自由编程
-      # - 23:33-23:40 : hehe
+    img_dir: E:\twitter_media\Dormicumproject
+    audio_dir_when_start: D:\coding\gptsovits_infer_api\output\现在该继续学习了哟
+    audio_dir_when_end: D:\coding\gptsovits_infer_api\output\现在是休息时间哦
+  - 
+    name: Today
+    working:
+      - 14:30-15:30 : 数学
+      - 15:31-17:00 : 出去跑步，然后吃饭
+      - 17:30-18:30 : 数学
+      - 18:40-19:40 : 数学
+      - 19:50-20:50 : 数学
+      - 21:00-22:00 : 数学
     img_dir: E:\twitter_media\Dormicumproject
     audio_dir_when_start: D:\coding\gptsovits_infer_api\output\现在该继续学习了哟
     audio_dir_when_end: D:\coding\gptsovits_infer_api\output\现在是休息时间哦
